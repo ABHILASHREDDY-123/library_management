@@ -214,6 +214,16 @@ router.put("/give/:refno/:reg_no",authenticate, (req, res) => {
                         let item = user.borrowed[id];
                         user.borrowed.remove(item);
                         user.list.push({ book_id: item.book_id, takendate: item.takendate, givendate: date });
+                        let sz = user.list.length;
+                        let fine = 0;
+                        let time = 2629800000;
+                        for (let i = 0; i < sz; i++) {
+                            if ((user.list[i].givendate.getMilliseconds() - user.list[i].takendate.getMilliseconds()) > time) {
+                                fine += (Math.floor((user.list[i].givendate - user.list[i].takendate) / time) * 10);
+                            }
+                        }
+                          user.fine = fine;
+                        
                         book.no_of_copies++;
                         if(book.no_of_copies>0){book.status=1;}
                         user.save().then((newuser) => {
